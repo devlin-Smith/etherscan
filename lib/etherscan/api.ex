@@ -37,7 +37,7 @@ defmodule Etherscan.API do
   def get(module, action, params \\ %{}) do
     module
     |> build_url(action, params)
-    |> HTTPoison.get!([%{"User-Agent"=> "Trixta"}], request_opts())
+    |> HTTPoison.get!([{:"User-Agent", "Trixta"}], request_opts())
     |> Map.get(:body)
   end
 
