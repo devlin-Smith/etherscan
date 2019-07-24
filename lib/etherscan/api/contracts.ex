@@ -18,17 +18,18 @@ defmodule Etherscan.API.Contracts do
       iex> Etherscan.get_contract_abi("#{@test_contract_address}")
       {:ok, [%{"name" => _, ...} | _] = contract_abi}
   """
-  @spec get_contract_abi(address :: String.t()) :: {:ok, list()} | {:error, atom()}
-  def get_contract_abi(address) when is_address(address) do
+  @spec get_contract_abi(address :: String.t(), network :: String.t()) :: {:ok, list()} | {:error, atom()}
+  def get_contract_abi(address, network \\ :default)
+  def get_contract_abi(address, network) when is_address(address) do
     "contract"
-    |> get("getabi", %{address: address})
+    |> get("getabi", %{address: address}, network)
     |> parse()
     # Decode again. ABI result is JSON
     |> Poison.decode!()
     |> wrap(:ok)
   end
 
-  def get_contract_abi(_), do: @error_invalid_address
+  def get_contract_abi(_, _), do: @error_invalid_address
 
   @doc """
   Get contract source code for contacts with verified source code
@@ -38,12 +39,13 @@ defmodule Etherscan.API.Contracts do
       iex> Etherscan.get_contract_source("#{@test_contract_address}")
       {:ok, [%{"name" => _, ...} | _] = contract_source}
   """
-  def get_contract_source(address) when is_address(address) do
+  def get_contract_source(address, network \\ :default)
+  def get_contract_source(address, network) when is_address(address) do
     "contract"
-    |> get("getsourcecode", %{address: address})
+    |> get("getsourcecode", %{address: address}, network)
     |> parse()
     |> wrap(:ok)
   end
 
-  def get_contract_source(_), do: @error_invalid_address
+  def get_contract_source(_, _), do: @error_invalid_address
 end

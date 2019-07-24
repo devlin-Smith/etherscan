@@ -30,16 +30,17 @@ defmodule Etherscan.API.Accounts do
       iex> Etherscan.get_balance("#{@test_address1}")
       {:ok, #{@test_address1_balance}}
   """
-  @spec get_balance(address :: String.t()) :: {:ok, non_neg_integer()} | {:error, atom()}
-  def get_balance(address) when is_address(address) do
+  @spec get_balance(address :: String.t(), network :: String.t()) :: {:ok, non_neg_integer()} | {:error, atom()}
+  def get_balance(address, network \\ :default)
+  def get_balance(address, network) when is_address(address) do
     "account"
-    |> get("balance", %{address: address, tag: "latest"})
+    |> get("balance", %{address: address, tag: "latest"}, network)
     |> parse()
     |> format_balance()
     |> wrap(:ok)
   end
 
-  def get_balance(_), do: @error_invalid_address
+  def get_balance(_, _), do: @error_invalid_address
 
   @doc """
   Get ether balance for a list of multiple `addresses`, up to a maximum of 20.
@@ -48,16 +49,17 @@ defmodule Etherscan.API.Accounts do
 
       iex> addresses = [
         "#{@test_address1}",
-        "#{@test_address2}",
+        "#{@test_address2}",get_logs/2
       ]
       iex> Etherscan.get_balances(addresses)
       {:ok, [#{@test_address1_balance}, #{@test_address2_balance}]}
   """
-  @spec get_balances(addresses :: list(String.t())) :: {:ok, map()} | {:error, atom()}
-  def get_balances([head | _] = addresses)
+  @spec get_balances(addresses :: list(String.t()), network :: String.t()) :: {:ok, map()} | {:error, atom()}
+  def get_balances(addresses, network \\ :default)
+  def get_balances([head | _] = addresses, network)
       when is_list(addresses) and is_address(head) and length(addresses) <= 20 do
     "account"
-    |> get("balancemulti", %{address: Enum.join(addresses, ","), tag: "latest"})
+    |> get("balancemulti", %{address: Enum.join(addresses, ","), tag: "latest"}, network)
     |> parse()
     |> Enum.map(fn account ->
       Map.update(account, "balance", 0, &format_balance/1)
@@ -65,7 +67,7 @@ defmodule Etherscan.API.Accounts do
     |> wrap(:ok)
   end
 
-  def get_balances(_), do: @error_invalid_addresses
+  def get_balances(_, _), do: @error_invalid_addresses
 
   @doc """
   Get a list of 'Normal' transactions by `address`.
@@ -84,23 +86,22 @@ defmodule Etherscan.API.Accounts do
       iex> Etherscan.get_transactions("#{@test_address1}", params)
       {:ok, [%Etherscan.Transaction{}]}
   """
-  @spec get_transactions(address :: String.t(), params :: map()) ::
+  @spec get_transactions(address :: String.t(), params :: map(), network :: String.t()) ::
           {:ok, list(Transaction.t())} | {:error, atom()}
-  def get_transactions(address, params \\ %{})
-
-  def get_transactions(address, params) when is_address(address) do
+  def get_transactions(address, params \\ %{}, network \\ :default)
+  def get_transactions(address, params, network) when is_address(address) do
     params =
       params
       |> merge_params(@account_transaction_default_params)
       |> Map.put(:address, address)
 
     "account"
-    |> get("txlist", params)
+    |> get("txlist", params, network)
     |> parse(as: %{"result" => [%Transaction{}]})
     |> wrap(:ok)
   end
 
-  def get_transactions(_, _), do: @error_invalid_address
+  def get_transactions(_, _, _), do: @error_invalid_address
 
   @doc """
   Get a list of 'Internal' transactions by `address`.
@@ -119,23 +120,23 @@ defmodule Etherscan.API.Accounts do
       iex> Etherscan.get_internal_transactions("#{@test_address1}", params)
       {:ok, [%Etherscan.InternalTransaction{}]}
   """
-  @spec get_internal_transactions(address :: String.t(), params :: map()) ::
+  @spec get_internal_transactions(address :: String.t(), params :: map(), network :: String.t()) ::
           {:ok, list(InternalTransaction.t())} | {:error, atom()}
-  def get_internal_transactions(address, params \\ %{})
+  def get_internal_transactions(address, params \\ %{}, network \\ :default)
 
-  def get_internal_transactions(address, params) when is_address(address) do
+  def get_internal_transactions(address, params, network) when is_address(address) do
     params =
       params
       |> merge_params(@account_transaction_default_params)
       |> Map.put(:address, address)
 
     "account"
-    |> get("txlistinternal", params)
+    |> get("txlistinternal", params, network)
     |> parse(as: %{"result" => [%InternalTransaction{}]})
     |> wrap(:ok)
   end
 
-  def get_internal_transactions(_, _), do: @error_invalid_address
+  def get_internal_transactions(_, _, _), do: @error_invalid_address
 
   @doc """
   Get a list of 'Internal Transactions' by `transaction_hash`.
@@ -147,16 +148,17 @@ defmodule Etherscan.API.Accounts do
       iex> Etherscan.get_internal_transactions_by_hash("#{@test_transaction_hash}")
       {:ok, [%Etherscan.InternalTransaction{}]}
   """
-  @spec get_internal_transactions_by_hash(transaction_hash :: String.t()) ::
+  @spec get_internal_transactions_by_hash(transaction_hash :: String.t(), network :: String.t()) ::
           {:ok, list(InternalTransaction.t())} | {:error, atom()}
-  def get_internal_transactions_by_hash(transaction_hash) when is_address(transaction_hash) do
+  def get_internal_transactions_by_hash(transaction_hash, network \\ :default)
+  def get_internal_transactions_by_hash(transaction_hash, network) when is_address(transaction_hash) do
     "account"
-    |> get("txlistinternal", %{txhash: transaction_hash})
+    |> get("txlistinternal", %{txhash: transaction_hash}, network)
     |> parse(as: %{"result" => [%InternalTransaction{hash: transaction_hash}]})
     |> wrap(:ok)
   end
 
-  def get_internal_transactions_by_hash(_), do: @error_invalid_transaction_hash
+  def get_internal_transactions_by_hash(_, _), do: @error_invalid_transaction_hash
 
   @doc """
   Get a list of blocks mined by `address`.
@@ -170,11 +172,11 @@ defmodule Etherscan.API.Accounts do
       iex> Etherscan.get_blocks_mined("#{@test_miner_address}", params)
       {:ok, [%Etherscan.MinedBlock{}]}
   """
-  @spec get_blocks_mined(address :: String.t(), params :: map()) ::
+  @spec get_blocks_mined(address :: String.t(), params :: map(), network :: String.t()) ::
           {:ok, list(MinedBlock.t())} | {:error, atom()}
-  def get_blocks_mined(address, params \\ %{})
+  def get_blocks_mined(address, params \\ %{}, network \\ :default)
 
-  def get_blocks_mined(address, params) when is_address(address) do
+  def get_blocks_mined(address, params, network) when is_address(address) do
     params =
       params
       |> merge_params(@blocks_mined_default_params)
@@ -182,12 +184,12 @@ defmodule Etherscan.API.Accounts do
       |> Map.put(:address, address)
 
     "account"
-    |> get("getminedblocks", params)
+    |> get("getminedblocks", params, network)
     |> parse(as: %{"result" => [%MinedBlock{}]})
     |> wrap(:ok)
   end
 
-  def get_blocks_mined(_, _), do: @error_invalid_address
+  def get_blocks_mined(_, _, _), do: @error_invalid_address
 
   @doc """
   Get a list of uncles mined by `address`.
@@ -201,11 +203,11 @@ defmodule Etherscan.API.Accounts do
       iex> Etherscan.get_uncles_mined("#{@test_miner_address}", params)
       {:ok, [%Etherscan.MinedUncle{}]}
   """
-  @spec get_uncles_mined(address :: String.t(), params :: map()) ::
+  @spec get_uncles_mined(address :: String.t(), params :: map(), network :: String.t()) ::
           {:ok, list(MinedUncle.t())} | {:error, atom()}
-  def get_uncles_mined(address, params \\ %{})
+  def get_uncles_mined(address, params \\ %{}, network \\ :default)
 
-  def get_uncles_mined(address, params) when is_address(address) do
+  def get_uncles_mined(address, params, network) when is_address(address) do
     params =
       params
       |> merge_params(@blocks_mined_default_params)
@@ -213,12 +215,12 @@ defmodule Etherscan.API.Accounts do
       |> Map.put(:address, address)
 
     "account"
-    |> get("getminedblocks", params)
+    |> get("getminedblocks", params, network)
     |> parse(as: %{"result" => [%MinedUncle{}]})
     |> wrap(:ok)
   end
 
-  def get_uncles_mined(_, _), do: @error_invalid_address
+  def get_uncles_mined(_, _, _), do: @error_invalid_address
 
   @doc """
   Get the ERC20 token balance of the `address` for token at `token_address`.
@@ -232,24 +234,25 @@ defmodule Etherscan.API.Accounts do
       iex> Etherscan.get_token_balance(address, token_address)
       {:ok, #{@test_token_address_balance}}
   """
-  @spec get_token_balance(address :: String.t(), token_address :: String.t()) ::
+  @spec get_token_balance(address :: String.t(), token_address :: String.t(), network :: String.t()) ::
           {:ok, non_neg_integer()} | {:error, atom()}
-  def get_token_balance(address, token_address)
+  def get_token_balance(address, token_address, network \\ :default)
+  def get_token_balance(address, token_address, network)
       when is_address(address) and is_address(token_address) do
     "account"
-    |> get("tokenbalance", %{address: address, contractaddress: token_address, tag: "latest"})
+    |> get("tokenbalance", %{address: address, contractaddress: token_address, tag: "latest"}, network)
     |> parse()
     |> String.to_integer()
     |> wrap(:ok)
   end
 
-  def get_token_balance(address, token_address)
+  def get_token_balance(address, token_address, network)
       when not is_address(address) and is_address(token_address),
       do: @error_invalid_address
 
-  def get_token_balance(address, token_address)
+  def get_token_balance(address, token_address, network)
       when not is_address(token_address) and is_address(address),
       do: @error_invalid_token_address
 
-  def get_token_balance(_, _), do: @error_invalid_address_and_token_address
+  def get_token_balance(_, _, _), do: @error_invalid_address_and_token_address
 end

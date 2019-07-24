@@ -34,9 +34,9 @@ defmodule Etherscan.API do
   end
 
   @spec get(module :: String.t(), action :: String.t(), params :: map()) :: String.t()
-  def get(module, action, params \\ %{}) do
+  def get(module, action, params \\ %{}, network \\ :default) do
     module
-    |> build_url(action, params)
+    |> build_url(action, params, network)
     |> HTTPoison.get!([{:"User-Agent", "Trixta"}], request_opts())
     |> Map.get(:body)
   end
@@ -53,14 +53,14 @@ defmodule Etherscan.API do
   defp extract(%{"result" => result}), do: result
   defp extract(response), do: response
 
-  @spec build_url(module :: String.t(), action :: String.t(), params :: map()) :: String.t()
-  defp build_url(module, action, params) do
+  @spec build_url(module :: String.t(), action :: String.t(), params :: map(), network :: String.t()) :: String.t()
+  defp build_url(module, action, params, network \\ :default) do
     params
     |> Map.put(:action, action)
     |> Map.put(:module, module)
     |> Map.put(:apikey, api_key())
     |> URI.encode_query()
-    |> (&"#{network_url()}?#{&1}").()
+    |> (&"#{network_url(network)}?#{&1}").()
   end
 
   @spec api_key :: String.t()
@@ -69,8 +69,8 @@ defmodule Etherscan.API do
   end
 
   @spec network_url :: String.t()
-  defp network_url do
-    case Application.get_env(:etherscan, :network) do
+  defp network_url(network \\ :default) do
+    case network do
       network when network in @api_networks ->
         Keyword.get(@api_network_urls, network)
 

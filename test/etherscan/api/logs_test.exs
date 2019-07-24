@@ -19,7 +19,7 @@ defmodule Etherscan.LogsTest do
             topic1: @test_topic_1,
             topic0_1_opr: "and"
           }
-          |> Etherscan.get_logs()
+          |> Etherscan.get_logs(nil)
 
         assert {:ok, logs} = response
         assert [%Log{address: @test_topic_address} = log | _] = logs
@@ -29,47 +29,47 @@ defmodule Etherscan.LogsTest do
     end
 
     test "with invalid params" do
-      response = Etherscan.get_logs("log_params")
+      response = Etherscan.get_logs("log_params", nil)
       assert {:error, :invalid_params} = response
     end
 
     test "with invalid address" do
-      response = Etherscan.get_logs(%{address: "not-an-address"})
+      response = Etherscan.get_logs(%{address: "not-an-address"}, nil)
       assert {:error, :invalid_address} = response
     end
 
     test "with invalid fromBlock string" do
-      response = Etherscan.get_logs(%{fromBlock: "not latest"})
+      response = Etherscan.get_logs(%{fromBlock: "not latest"}, nil)
       assert {:error, :invalid_from_block} = response
     end
 
     test "with invalid fromBlock type" do
-      response = Etherscan.get_logs(%{fromBlock: nil})
+      response = Etherscan.get_logs(%{fromBlock: nil}, nil)
       assert {:error, :invalid_from_block} = response
     end
 
     test "with invalid toBlock string" do
-      response = Etherscan.get_logs(%{toBlock: "not latest"})
+      response = Etherscan.get_logs(%{toBlock: "not latest"}, nil)
       assert {:error, :invalid_to_block} = response
     end
 
     test "with invalid toBlock type" do
-      response = Etherscan.get_logs(%{toBlock: nil})
+      response = Etherscan.get_logs(%{toBlock: nil}, nil)
       assert {:error, :invalid_to_block} = response
     end
 
     test "with invalid topic0_1_opr" do
-      response = Etherscan.get_logs(%{topic0_1_opr: "a n d"})
+      response = Etherscan.get_logs(%{topic0_1_opr: "a n d"}, nil)
       assert {:error, :invalid_topic0_1_opr} = response
     end
 
     test "with invalid topic1_2_opr" do
-      response = Etherscan.get_logs(%{topic1_2_opr: "andddd"})
+      response = Etherscan.get_logs(%{topic1_2_opr: "andddd"}, nil)
       assert {:error, :invalid_topic1_2_opr} = response
     end
 
     test "with invalid topic2_3_opr" do
-      response = Etherscan.get_logs(%{topic2_3_opr: "banana"})
+      response = Etherscan.get_logs(%{topic2_3_opr: "banana"}, nil)
       assert {:error, :invalid_topic2_3_opr} = response
     end
   end

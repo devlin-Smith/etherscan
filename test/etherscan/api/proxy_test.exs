@@ -12,7 +12,7 @@ defmodule Etherscan.ProxyTest do
   describe "eth_block_number/0" do
     test "returns the most recent block number" do
       use_cassette "eth_block_number" do
-        response = Etherscan.eth_block_number()
+        response = Etherscan.eth_block_number(nil)
         assert {:ok, @test_proxy_block_number} = response
       end
     end
@@ -21,13 +21,13 @@ defmodule Etherscan.ProxyTest do
   describe "eth_get_block_by_number/1" do
     test "with valid tag returns a block struct" do
       use_cassette "eth_get_block_by_number" do
-        response = Etherscan.eth_get_block_by_number(@test_proxy_block_tag)
+        response = Etherscan.eth_get_block_by_number(@test_proxy_block_tag, nil)
         assert {:ok, %ProxyBlock{}} = response
       end
     end
 
     test "with invalid tag" do
-      response = Etherscan.eth_get_block_by_number(%{})
+      response = Etherscan.eth_get_block_by_number(%{}, nil)
       assert {:error, :invalid_tag} = response
     end
   end
@@ -38,7 +38,8 @@ defmodule Etherscan.ProxyTest do
         response =
           Etherscan.eth_get_uncle_by_block_number_and_index(
             @test_proxy_uncle_tag,
-            @test_proxy_index
+            @test_proxy_index,
+            nil
           )
 
         assert {:ok, %{"number" => @test_proxy_uncle_block_tag}} = response
@@ -46,17 +47,17 @@ defmodule Etherscan.ProxyTest do
     end
 
     test "with invalid tag" do
-      response = Etherscan.eth_get_uncle_by_block_number_and_index(nil, @test_proxy_index)
+      response = Etherscan.eth_get_uncle_by_block_number_and_index(nil, @test_proxy_index, nil)
       assert {:error, :invalid_tag} = response
     end
 
     test "with invalid index" do
-      response = Etherscan.eth_get_uncle_by_block_number_and_index(@test_proxy_uncle_tag, nil)
+      response = Etherscan.eth_get_uncle_by_block_number_and_index(@test_proxy_uncle_tag, nil, nil)
       assert {:error, :invalid_index} = response
     end
 
     test "with invalid tag and index" do
-      response = Etherscan.eth_get_uncle_by_block_number_and_index(nil, nil)
+      response = Etherscan.eth_get_uncle_by_block_number_and_index(nil, nil, nil)
       assert {:error, :invalid_tag_and_index} = response
     end
   end
@@ -65,14 +66,14 @@ defmodule Etherscan.ProxyTest do
     test "with valid tag" do
       use_cassette "eth_get_block_transaction_count_by_number" do
         response =
-          Etherscan.eth_get_block_transaction_count_by_number(@test_proxy_transaction_tag)
+          Etherscan.eth_get_block_transaction_count_by_number(@test_proxy_transaction_tag, nil)
 
         assert {:ok, @test_proxy_block_transaction_count} = response
       end
     end
 
     test "with invalid tag" do
-      response = Etherscan.eth_get_block_transaction_count_by_number(nil)
+      response = Etherscan.eth_get_block_transaction_count_by_number(nil, nil)
       assert {:error, :invalid_tag} = response
     end
   end
@@ -80,13 +81,13 @@ defmodule Etherscan.ProxyTest do
   describe "eth_get_transaction_by_hash/1" do
     test "with valid transaction hash returns a transaction struct" do
       use_cassette "eth_get_transaction_by_hash" do
-        response = Etherscan.eth_get_transaction_by_hash(@test_proxy_transaction_hash)
+        response = Etherscan.eth_get_transaction_by_hash(@test_proxy_transaction_hash, nil)
         assert {:ok, %ProxyTransaction{hash: @test_proxy_transaction_hash}} = response
       end
     end
 
     test "with invalid transaction hash" do
-      response = Etherscan.eth_get_transaction_by_hash(nil)
+      response = Etherscan.eth_get_transaction_by_hash(nil, nil)
       assert {:error, :invalid_transaction_hash} = response
     end
   end
@@ -97,7 +98,8 @@ defmodule Etherscan.ProxyTest do
         response =
           Etherscan.eth_get_transaction_by_block_number_and_index(
             @test_proxy_block_tag,
-            @test_proxy_index
+            @test_proxy_index,
+            nil
           )
 
         assert {:ok, %ProxyTransaction{}} = response
@@ -105,19 +107,19 @@ defmodule Etherscan.ProxyTest do
     end
 
     test "with invalid tag" do
-      response = Etherscan.eth_get_transaction_by_block_number_and_index(nil, @test_proxy_index)
+      response = Etherscan.eth_get_transaction_by_block_number_and_index(nil, @test_proxy_index, nil)
       assert {:error, :invalid_tag} = response
     end
 
     test "with invalid index" do
       response =
-        Etherscan.eth_get_transaction_by_block_number_and_index(@test_proxy_block_tag, nil)
+        Etherscan.eth_get_transaction_by_block_number_and_index(@test_proxy_block_tag, nil, nil)
 
       assert {:error, :invalid_index} = response
     end
 
     test "with invalid tag and index" do
-      response = Etherscan.eth_get_transaction_by_block_number_and_index(nil, nil)
+      response = Etherscan.eth_get_transaction_by_block_number_and_index(nil, nil, nil)
       assert {:error, :invalid_tag_and_index} = response
     end
   end
@@ -125,13 +127,13 @@ defmodule Etherscan.ProxyTest do
   describe "eth_get_transaction_count/1" do
     test "with valid address" do
       use_cassette "eth_get_transaction_count" do
-        response = Etherscan.eth_get_transaction_count(@test_proxy_address)
+        response = Etherscan.eth_get_transaction_count(@test_proxy_address, nil)
         assert {:ok, @test_proxy_transaction_count} = response
       end
     end
 
     test "with invalid address" do
-      response = Etherscan.eth_get_transaction_count(nil)
+      response = Etherscan.eth_get_transaction_count(nil, nil)
       assert {:error, :invalid_address} = response
     end
   end
@@ -140,13 +142,13 @@ defmodule Etherscan.ProxyTest do
     @tag :wip
     test "with valid hex" do
       use_cassette "eth_send_raw_transaction" do
-        response = Etherscan.eth_send_raw_transaction(@test_proxy_hex)
+        response = Etherscan.eth_send_raw_transaction(@test_proxy_hex, nil)
         assert {:ok, %{"code" => -32000}} = response
       end
     end
 
     test "with invalid hex" do
-      response = Etherscan.eth_send_raw_transaction(nil)
+      response = Etherscan.eth_send_raw_transaction(nil, nil)
       assert {:error, :invalid_hex} = response
     end
   end
@@ -154,7 +156,7 @@ defmodule Etherscan.ProxyTest do
   describe "eth_get_transaction_receipt/1" do
     test "with valid transaction hash returns a transaction receipt struct" do
       use_cassette "eth_get_transaction_receipt" do
-        response = Etherscan.eth_get_transaction_receipt(@test_proxy_transaction_hash)
+        response = Etherscan.eth_get_transaction_receipt(@test_proxy_transaction_hash, nil)
 
         assert {:ok, %ProxyTransactionReceipt{transactionHash: @test_proxy_transaction_hash}} =
                  response
@@ -162,7 +164,7 @@ defmodule Etherscan.ProxyTest do
     end
 
     test "with invalid transaction hash" do
-      response = Etherscan.eth_get_transaction_receipt(nil)
+      response = Etherscan.eth_get_transaction_receipt(nil, nil)
       assert {:error, :invalid_transaction_hash} = response
     end
   end
@@ -170,23 +172,23 @@ defmodule Etherscan.ProxyTest do
   describe "eth_call/3" do
     test "with valid to and data" do
       use_cassette "eth_call" do
-        response = Etherscan.eth_call(@test_proxy_to, @test_proxy_data)
+        response = Etherscan.eth_call(@test_proxy_to, @test_proxy_data, nil)
         assert {:ok, @test_proxy_eth_call_result} = response
       end
     end
 
     test "with invalid to" do
-      response = Etherscan.eth_call(nil, @test_proxy_data)
+      response = Etherscan.eth_call(nil, @test_proxy_data, nil)
       assert {:error, :invalid_to} = response
     end
 
     test "with invalid data" do
-      response = Etherscan.eth_call(@test_proxy_to, nil)
+      response = Etherscan.eth_call(@test_proxy_to, nil, nil)
       assert {:error, :invalid_data} = response
     end
 
     test "with invalid to and data" do
-      response = Etherscan.eth_call(nil, nil)
+      response = Etherscan.eth_call(nil, nil, nil)
       assert {:error, :invalid_to_and_data} = response
     end
   end
@@ -194,23 +196,23 @@ defmodule Etherscan.ProxyTest do
   describe "eth_get_code/2" do
     test "with valid address and tag" do
       use_cassette "eth_get_code" do
-        response = Etherscan.eth_get_code(@test_proxy_code_address, "latest")
+        response = Etherscan.eth_get_code(@test_proxy_code_address, "latest", nil)
         assert {:ok, @test_proxy_code_result} = response
       end
     end
 
     test "with invalid address" do
-      response = Etherscan.eth_get_code(nil, "latest")
+      response = Etherscan.eth_get_code(nil, "latest", nil)
       assert {:error, :invalid_address} = response
     end
 
     test "with invalid tag" do
-      response = Etherscan.eth_get_code(@test_proxy_address, nil)
+      response = Etherscan.eth_get_code(@test_proxy_address, nil, nil)
       assert {:error, :invalid_tag} = response
     end
 
     test "with invalid address and tag" do
-      response = Etherscan.eth_get_code(nil, nil)
+      response = Etherscan.eth_get_code(nil, nil, nil)
       assert {:error, :invalid_address_and_tag} = response
     end
   end
@@ -219,24 +221,24 @@ defmodule Etherscan.ProxyTest do
     test "with valid address and position" do
       use_cassette "eth_get_storage_at" do
         response =
-          Etherscan.eth_get_storage_at(@test_proxy_storage_address, @test_proxy_storage_position)
+          Etherscan.eth_get_storage_at(@test_proxy_storage_address, @test_proxy_storage_position, nil)
 
         assert {:ok, @test_proxy_storage_result} = response
       end
     end
 
     test "with invalid address" do
-      response = Etherscan.eth_get_storage_at(nil, @test_proxy_storage_position)
+      response = Etherscan.eth_get_storage_at(nil, @test_proxy_storage_position, nil)
       assert {:error, :invalid_address} = response
     end
 
     test "with invalid position" do
-      response = Etherscan.eth_get_storage_at(@test_proxy_storage_address, nil)
+      response = Etherscan.eth_get_storage_at(@test_proxy_storage_address, nil, nil)
       assert {:error, :invalid_position} = response
     end
 
     test "with invalid address and position" do
-      response = Etherscan.eth_get_storage_at(nil, nil)
+      response = Etherscan.eth_get_storage_at(nil, nil, nil)
       assert {:error, :invalid_address_and_position} = response
     end
   end
@@ -244,7 +246,7 @@ defmodule Etherscan.ProxyTest do
   describe "eth_gas_price/0" do
     test "returns the current price per gas" do
       use_cassette "eth_gas_price" do
-        response = Etherscan.eth_gas_price()
+        response = Etherscan.eth_gas_price(nil)
         assert {:ok, @test_proxy_current_gas} = response
       end
     end
@@ -261,13 +263,13 @@ defmodule Etherscan.ProxyTest do
           gas: @test_proxy_gas
         }
 
-        response = Etherscan.eth_estimate_gas(params)
+        response = Etherscan.eth_estimate_gas(params, nil)
         assert {:ok, %{"code" => -32602}} = response
       end
     end
 
     test "with invalid params" do
-      response = Etherscan.eth_estimate_gas(nil)
+      response = Etherscan.eth_estimate_gas(nil, nil)
       assert {:error, :invalid_params} = response
     end
   end

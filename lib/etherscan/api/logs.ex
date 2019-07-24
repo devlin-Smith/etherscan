@@ -64,33 +64,34 @@ defmodule Etherscan.API.Logs do
       iex> Etherscan.get_logs(params)
       {:ok, [%Etherscan.Log{}]}
   """
-  @spec get_logs(params :: map()) :: {:ok, list(Log.t())} | {:error, atom()}
-  def get_logs(%{address: address}) when not is_address(address), do: @error_invalid_address
+  @spec get_logs(params :: map(), network :: String.t()) :: {:ok, list(Log.t())} | {:error, atom()}
+  def get_logs(params, network \\ :default)
+  def get_logs(%{address: address}, network) when not is_address(address), do: @error_invalid_address
 
-  def get_logs(%{fromBlock: from_block})
+  def get_logs(%{fromBlock: from_block}, network)
       when not (is_integer(from_block) or from_block == "latest"),
       do: @error_invalid_from_block
 
-  def get_logs(%{toBlock: to_block}) when not (is_integer(to_block) or to_block == "latest"),
+  def get_logs(%{toBlock: to_block}, network) when not (is_integer(to_block) or to_block == "latest"),
     do: @error_invalid_to_block
 
-  def get_logs(%{topic0_1_opr: operator}) when operator not in @operators,
+  def get_logs(%{topic0_1_opr: operator}, network) when operator not in @operators,
     do: @error_invalid_topic0_1_opr
 
-  def get_logs(%{topic1_2_opr: operator}) when operator not in @operators,
+  def get_logs(%{topic1_2_opr: operator}, network) when operator not in @operators,
     do: @error_invalid_topic1_2_opr
 
-  def get_logs(%{topic2_3_opr: operator}) when operator not in @operators,
+  def get_logs(%{topic2_3_opr: operator}, network) when operator not in @operators,
     do: @error_invalid_topic2_3_opr
 
-  def get_logs(params) when is_map(params) do
+  def get_logs(params, network) when is_map(params) do
     params = merge_params(params, @get_logs_default_params)
 
     "logs"
-    |> get("getLogs", params)
+    |> get("getLogs", params, network)
     |> parse(as: %{"result" => [%Log{}]})
     |> wrap(:ok)
   end
 
-  def get_logs(_), do: @error_invalid_params
+  def get_logs(_, _), do: @error_invalid_params
 end

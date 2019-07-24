@@ -12,7 +12,7 @@ defmodule Etherscan.BlocksTest do
   describe "get_block_and_uncle_rewards/1" do
     test "returns a block reward struct" do
       use_cassette "get_block_and_uncle_rewards" do
-        response = Etherscan.get_block_and_uncle_rewards(@test_block_number)
+        response = Etherscan.get_block_and_uncle_rewards(@test_block_number, nil)
         assert {:ok, reward} = response
         assert %BlockReward{} = reward
       end
@@ -20,16 +20,16 @@ defmodule Etherscan.BlocksTest do
 
     test "inclues block reward uncle structs" do
       use_cassette "get_block_and_uncle_rewards" do
-        response = Etherscan.get_block_and_uncle_rewards(@test_block_number)
+        response = Etherscan.get_block_and_uncle_rewards(@test_block_number, nil)
         assert {:ok, %BlockReward{uncles: uncles}} = response
         assert [%BlockRewardUncle{} | _] = uncles
       end
     end
 
     test "with invalid block number" do
-      response = Etherscan.get_block_and_uncle_rewards(-5)
+      response = Etherscan.get_block_and_uncle_rewards(-5, nil)
       assert {:error, :invalid_block_number} = response
-      response = Etherscan.get_block_and_uncle_rewards("fake block")
+      response = Etherscan.get_block_and_uncle_rewards("fake block", nil)
       assert {:error, :invalid_block_number} = response
     end
   end

@@ -11,7 +11,7 @@ defmodule Etherscan.ContractsTest do
   describe "get_contract_abi/1" do
     test "with valid address" do
       use_cassette "get_contract_abi" do
-        assert {:ok, abi} = Etherscan.get_contract_abi(@test_contract_address)
+        assert {:ok, abi} = Etherscan.get_contract_abi(@test_contract_address, nil)
         assert [%{"name" => _} | _] = abi
         assert [%{"type" => _} | _] = abi
         assert [%{"constant" => _} | _] = abi
@@ -21,7 +21,7 @@ defmodule Etherscan.ContractsTest do
     end
 
     test "with invalid address" do
-      response = Etherscan.get_contract_abi({:hello, :world})
+      response = Etherscan.get_contract_abi({:hello, :world}, nil)
       assert {:error, :invalid_address} = response
     end
   end
@@ -29,7 +29,7 @@ defmodule Etherscan.ContractsTest do
   describe "get_contract_source/1" do
     test "with valid address" do
       use_cassette "get_contract_source" do
-        assert {:ok, source} = Etherscan.get_contract_source(@test_contract_address)
+        assert {:ok, source} = Etherscan.get_contract_source(@test_contract_address, nil)
         assert [%{"ABI" => _} | _] = source
         assert [%{"CompilerVersion" => _} | _] = source
         assert [%{"ConstructorArguments" => _} | _] = source
@@ -43,7 +43,7 @@ defmodule Etherscan.ContractsTest do
     end
 
     test "with invalid address" do
-      response = Etherscan.get_contract_source({:foo, :bar})
+      response = Etherscan.get_contract_source({:foo, :bar}, nil)
       assert {:error, :invalid_address} = response
     end
   end

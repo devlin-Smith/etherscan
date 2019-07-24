@@ -17,9 +17,9 @@ defmodule Etherscan.API.Stats do
       {:ok, #{@test_eth_supply}}
   """
   @spec get_eth_supply :: {:ok, non_neg_integer()}
-  def get_eth_supply do
+  def get_eth_supply(network \\ :default) do
     "stats"
-    |> get("ethsupply")
+    |> get("ethsupply", %{}, network)
     |> parse()
     |> format_balance()
     |> wrap(:ok)
@@ -34,9 +34,9 @@ defmodule Etherscan.API.Stats do
       {:ok, %{"ethbtc" => #{@test_eth_btc_price}, "ethusd" => #{@test_eth_usd_price}}}
   """
   @spec get_eth_price :: {:ok, map()}
-  def get_eth_price do
+  def get_eth_price(network \\ :default) do
     "stats"
-    |> get("ethprice")
+    |> get("ethprice", %{}, network)
     |> parse()
     |> wrap(:ok)
   end
@@ -53,13 +53,14 @@ defmodule Etherscan.API.Stats do
   """
   @spec get_token_supply(token_address :: String.t()) ::
           {:ok, non_neg_integer()} | {:error, atom()}
-  def get_token_supply(token_address) when is_address(token_address) do
+  def get_token_supply(token_address, network \\ :default)
+  def get_token_supply(token_address, network) when is_address(token_address) do
     "stats"
-    |> get("tokensupply", %{contractaddress: token_address})
+    |> get("tokensupply", %{contractaddress: token_address}, network)
     |> parse()
     |> String.to_integer()
     |> wrap(:ok)
   end
 
-  def get_token_supply(_), do: @error_invalid_token_address
+  def get_token_supply(_, _), do: @error_invalid_token_address
 end
