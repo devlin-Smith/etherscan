@@ -56,6 +56,8 @@ defmodule Etherscan.API do
 
   @spec build_url(module :: String.t(), action :: String.t(), params :: map(), network :: String.t()) :: String.t()
   defp build_url(module, action, params, network \\ :default) do
+    IO.puts "build_url network"
+    IO.puts network
     params
     |> Map.put(:action, action)
     |> Map.put(:module, module)
