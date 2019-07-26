@@ -35,10 +35,6 @@ defmodule Etherscan.API do
 
   @spec get(module :: String.t(), action :: String.t(), params :: map()) :: String.t()
   def get(module, action, params \\ %{}, network \\ :default) do
-    IO.puts "get"
-    IO.puts network
-    IO.puts Kernel.is_atom(network)
-    IO.puts build_url(module, action, params, network)
     module
     |> build_url(action, params, network)
     |> HTTPoison.get!([{:"User-Agent", "Trixta"}], request_opts())
