@@ -76,9 +76,20 @@ defmodule Etherscan.API do
 
   @spec network_url :: String.t()
   defp network_url(network \\ :default) do
-    case network do
-      network when network in @api_networks ->
-        Keyword.get(@api_network_urls, network)
+    target_network =
+      case network do
+        "ropsten" ->
+          :ropsten
+        "rinkeby" ->
+          :rinkeby
+        "kovan" ->
+          :kovan
+        _ ->
+          :default
+      end
+    case target_network do
+      target_network when target_network in @api_networks ->
+        Keyword.get(@api_network_urls, target_network)
 
       _ ->
         Keyword.get(@api_network_urls, :default)
