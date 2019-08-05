@@ -9,6 +9,8 @@ defmodule Etherscan do
   defdelegate get_balances(addresses, network), to: API.Accounts
   defdelegate get_transactions(address, network), to: API.Accounts
   defdelegate get_transactions(address, params, network), to: API.Accounts
+  defdelegate get_ERC20_transactions(address, network), to: API.Accounts
+  defdelegate get_ERC20_transactions(address, params, network), to: API.Accounts
   defdelegate get_internal_transactions(address, network), to: API.Accounts
   defdelegate get_internal_transactions(address, params, network), to: API.Accounts
   defdelegate get_internal_transactions_by_hash(transaction_hash, network), to: API.Accounts

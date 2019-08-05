@@ -104,6 +104,40 @@ defmodule Etherscan.API.Accounts do
   def get_transactions(_, _, _), do: @error_invalid_address
 
   @doc """
+  Get a list of 'ERC20 - Token Transfer Events' by `address`.
+
+  Returns up to a maximum of the last 10,000 transactions only.
+
+  ## Example
+
+      iex> params = %{
+        page: 1, # Page number
+        offset: 10, # Max records returned
+        sort: "asc", # Sort returned records
+        startblock: 0, # Start block number
+        endblock: 99999999, # End block number
+      }
+      iex> Etherscan.get_transactions("#{@test_address1}", params)
+      {:ok, [%Etherscan.Transaction{}]}
+  """
+  @spec get_ERC20_transactions(address :: String.t(), params :: map(), network :: String.t()) ::
+          {:ok, list(Transaction.t())} | {:error, atom()}
+  def get_ERC20_transactions(address, params \\ %{}, network \\ :default)
+  def get_ERC20_transactions(address, params, network) when is_address(address) do
+    params =
+      params
+      |> merge_params(@account_transaction_default_params)
+      |> Map.put(:address, address)
+
+    "account"
+    |> get("tokentx", params, network)
+    |> parse(as: %{"result" => [%Transaction{}]})
+    |> wrap(:ok)
+  end
+
+  def get_ERC20_transactions(_, _, _), do: @error_invalid_address
+
+  @doc """
   Get a list of 'Internal' transactions by `address`.
 
   Returns up to a maximum of the last 10,000 transactions only.
